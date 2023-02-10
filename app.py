@@ -85,6 +85,10 @@ data_list = [SendEvent(from_user_name=get_id2name()[data.from_user_id],to_user_n
 
 print(data_list)
 
+def update_data_list():
+    global data_list
+    data_list = [SendEvent(from_user_name=get_id2name()[data.from_user_id],to_user_name=get_id2name()[data.to_user_id],money=data.money,date=data.date) for data in get_all_send_money()]
+
 @app.route('/')
 def hello_world():  # put application's code here
     return render_template("index.html")
@@ -92,19 +96,15 @@ def hello_world():  # put application's code here
 @app.get('/send')
 def send():  # put application's code here
     if request.args.get("money"):
-        data_list.append(
-            SendEvent(
-                from_user_name=request.args.get("from_user_name"),
-                to_user_name=request.args.get("to_user_name"),
-                money=int(request.args.get("money")),
-                date=datetime.now()
-            )
-        )
-        print(data_list)
         add_send_money(
             from_user_id=get_name2id()[request.args.get("from_user_name")],
             to_user_id=get_name2id()[request.args.get("to_user_name")],
             money=int(request.args.get("money"))
+        )
+        add_send_money(
+            from_user_id=get_name2id()[request.args.get("to_user_name")],
+            to_user_id=get_name2id()[request.args.get("from_user_name")],
+            money=-1*int(request.args.get("money"))
         )
     else:
         # 既存ユーザの一覧になかったらuserに追加
@@ -114,19 +114,29 @@ def send():  # put application's code here
             get_id2name.cache_clear()
             get_id2name()
             get_name2id()
-
+    update_data_list()
     return render_template("send.html",user_name=request.args.get("from_user_name"))
 
 @app.get('/summary')
 def summary():  # put application's code here
     # return render_template('summary.html', user_name= request.args.get("user_name"), data = [f"{data.date.strftime('%Y-%m-%d %H:%M:%S')} {data.to_user_name}様へ {data.money}円" for data in data_list],sum=sum([data.money for data in data_list]))
-    my_data = [data for data in data_list if data.from_user_name == request.args.get("user_name")]
+    update_data_list()
+    my_data = [data for data in data_list if data.to_user_name == request.args.get("user_name")]
+    print(my_data)
     return render_template('summary.html', user_name= request.args.get("user_name"), data = [f"{data.date.strftime('%Y-%m-%d %H:%M:%S')} {data.to_user_name}様へ {data.money}円" for data in my_data],sum=sum([data.money for data in my_data]))
+
+@app.get('/send_summary')
+def send_summary():  # put application's code here
+    # return render_template('summary.html', user_name= request.args.get("user_name"), data = [f"{data.date.strftime('%Y-%m-%d %H:%M:%S')} {data.to_user_name}様へ {data.money}円" for data in data_list],sum=sum([data.money for data in data_list]))
+    update_data_list()
+    my_data = [data for data in data_list if data.from_user_name == request.args.get("user_name")]
+    return render_template('send_summary.html', user_name= request.args.get("user_name"), data = [f"{data.date.strftime('%Y-%m-%d %H:%M:%S')} {data.to_user_name}様へ {data.money}円" for data in my_data],sum=sum([data.money for data in my_data]))
 
 
 @app.get('/get_summary')
 def get_summary():  # put application's code here
-    my_data = [data for data in data_list if data.to_user_name == request.args.get("user_name")]
+    update_data_list()
+    my_data = [data for data in data_list if data.to_user_name == request.args.get("user_name") and data.money > 0]
     return render_template('get_summary.html', user_name= request.args.get("user_name"), data = [f"{data.date.strftime('%Y-%m-%d %H:%M:%S')} {data.from_user_name}様から {data.money}円" for data in my_data],sum=sum([data.money for data in my_data]))
 
 
