@@ -15,7 +15,6 @@ engine = create_engine('postgresql://hiroyuki:DBNi76tCKqjfNBcxCJvIZQhWqC8uW2Cd@d
 from sqlalchemy.schema import Column
 from sqlalchemy.orm import sessionmaker
 SessionClass = sessionmaker(engine)  # セッションを作るクラスを作成
-session = SessionClass()
 
 # スキーマをtestに変更
 # engine.execute("SET search_path TO test")
@@ -31,13 +30,30 @@ class User(Base):
 
 # 全userの情報を取得する関数
 def get_all_users():
-    return session.query(User).all()
+    session = SessionClass()
+    try:
+        ret = session.query(User).all()
+    except:
+        # if any kind of exception occurs, rollback transaction
+        session.rollback()
+        raise
+    finally:
+        session.close()
+    return ret
 
 # userを登録する関数
 def add_user(name):
+    session = SessionClass()
     user = User(name=name)
     session.add(user)
-    session.commit()
+    try:
+        session.commit()
+    except:
+        # if any kind of exception occurs, rollback transaction
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 # 送金情報を取得
 class SendMoney(Base):
@@ -63,11 +79,28 @@ def get_name2id():
 def add_send_money(from_user_id,to_user_id,money):
     date = datetime.now()
     send_money = SendMoney(from_user_id=from_user_id,to_user_id=to_user_id,money=money,date=date)
-    session.add(send_money)
-    session.commit()
+    session = SessionClass()
+    try:
+        session.add(send_money)
+        session.commit()
+    except:
+        # if any kind of exception occurs, rollback transaction
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 def get_all_send_money():
-    return session.query(SendMoney).all()
+    session = SessionClass()
+    try:
+        ret = session.query(SendMoney).all()
+    except:
+        # if any kind of exception occurs, rollback transaction
+        session.rollback()
+        raise
+    finally:
+        session.close()
+    return ret
 
 @dataclass
 class SendEvent:
