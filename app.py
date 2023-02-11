@@ -123,21 +123,21 @@ def summary():  # put application's code here
     update_data_list()
     my_data = [data for data in data_list if data.to_user_name == request.args.get("user_name")]
     print(my_data)
-    return render_template('summary.html', user_name= request.args.get("user_name"), data = [f"{data.date.strftime('%Y-%m-%d %H:%M:%S')} {data.to_user_name}様へ {data.money}円" for data in my_data],sum=sum([data.money for data in my_data]))
+    return render_template('summary.html', user_name= request.args.get("user_name"), data = [f"{data.date.strftime('%Y-%m-%d %H:%M:%S')} {data.to_user_name}様へ {data.money}円" for data in my_data[:10]],sum=sum([data.money for data in my_data]))
 
 @app.get('/send_summary')
 def send_summary():  # put application's code here
     # return render_template('summary.html', user_name= request.args.get("user_name"), data = [f"{data.date.strftime('%Y-%m-%d %H:%M:%S')} {data.to_user_name}様へ {data.money}円" for data in data_list],sum=sum([data.money for data in data_list]))
     update_data_list()
-    my_data = [data for data in data_list if data.from_user_name == request.args.get("user_name")]
-    return render_template('send_summary.html', user_name= request.args.get("user_name"), data = [f"{data.date.strftime('%Y-%m-%d %H:%M:%S')} {data.to_user_name}様へ {data.money}円" for data in my_data],sum=sum([data.money for data in my_data]))
+    my_data = [data for data in data_list if data.from_user_name == request.args.get("user_name") and data.money > 0]
+    return render_template('send_summary.html', user_name= request.args.get("user_name"), data = [f"{data.date.strftime('%Y-%m-%d %H:%M:%S')} {data.to_user_name}様へ {data.money}円" for data in my_data[:10]],sum=sum([data.money for data in my_data]))
 
 
 @app.get('/get_summary')
 def get_summary():  # put application's code here
     update_data_list()
     my_data = [data for data in data_list if data.to_user_name == request.args.get("user_name") and data.money > 0]
-    return render_template('get_summary.html', user_name= request.args.get("user_name"), data = [f"{data.date.strftime('%Y-%m-%d %H:%M:%S')} {data.from_user_name}様から {data.money}円" for data in my_data],sum=sum([data.money for data in my_data]))
+    return render_template('get_summary.html', user_name= request.args.get("user_name"), data = [f"{data.date.strftime('%Y-%m-%d %H:%M:%S')} {data.from_user_name}様から {data.money}円" for data in my_data[:10]],sum=sum([data.money for data in my_data]))
 
 
 if __name__ == '__main__':
