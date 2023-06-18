@@ -10,7 +10,20 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.types import Integer, String, DateTime
 Base = declarative_base()
 app = Flask(__name__)
-engine = create_engine('postgresql://hiroyuki:DBNi76tCKqjfNBcxCJvIZQhWqC8uW2Cd@dpg-cffg9m82i3mg6p8memu0-a.singapore-postgres.render.com:5432/test')
+
+from sqlalchemy import create_engine
+from urllib.parse import quote
+
+username = 'postgres'
+password = quote('r@99hYRq$8Y*CNG')  # URL encode the password to safely include special characters
+hostname = 'db.cjboyfwfkioaojqktvnf.supabase.co'
+database = 'postgres'
+
+engine = create_engine(f'postgresql://{username}:{password}@{hostname}:5432/{database}')
+
+
+# engine = create_engine('postgresql://hiroyuki:DBNi76tCKqjfNBcxCJvIZQhWqC8uW2Cd@dpg-cffg9m82i3mg6p8memu0-a.singapore-postgres.render.com:5432/test')
+# engine = create_engine('postgresql://postgres:r@99hYRq$8Y*CNG@db.cjboyfwfkioaojqktvnf.supabase.co:5432/postgres')
 
 from sqlalchemy.schema import Column
 from sqlalchemy.orm import sessionmaker
@@ -22,7 +35,7 @@ SessionClass = sessionmaker(engine)  # セッションを作るクラスを作�
 # userの情報を取得
 class User(Base):
     __tablename__ = 'user'
-    __table_args__ = {'schema': 'test'}
+    __table_args__ = {'schema': 'manage_child_money'}
     id = Column(Integer, primary_key=True)
     name = Column(String(80), unique=False, nullable=False)
     def __repr__(self):
@@ -58,7 +71,7 @@ def add_user(name):
 # 送金情報を取得
 class SendMoney(Base):
     __tablename__ = 'send_money'
-    __table_args__ = {'schema': 'test'}
+    __table_args__ = {'schema': 'manage_child_money'}
     id = Column(Integer, primary_key=True)
     from_user_id = Column(Integer, unique=False, nullable=False)
     to_user_id = Column(Integer, unique=False, nullable=False)
@@ -174,10 +187,10 @@ def get_summary():  # put application's code here
 
 
 if __name__ == '__main__':
-    # add_user("kiyona")
     # inspector = sqlalchemy.inspect(engine)
     # db内のテーブル一覧を表示
     # print(inspector.get_table_names())
+    # add_user("kiyona")
     # columns = inspector.get_columns("user")
     # print(get_all_users())
     # add_send_money(1,2,100)
