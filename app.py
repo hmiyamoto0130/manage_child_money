@@ -14,9 +14,10 @@ app = Flask(__name__)
 from sqlalchemy import create_engine
 from urllib.parse import quote
 
-username = 'postgres'
+username = 'postgres.cjboyfwfkioaojqktvnf'
 password = quote('r@99hYRq$8Y*CNG')  # URL encode the password to safely include special characters
-hostname = 'db.cjboyfwfkioaojqktvnf.supabase.co'
+# hostname = 'db.cjboyfwfkioaojqktvnf.supabase.co'
+hostname = 'aws-0-ap-northeast-1.pooler.supabase.com'
 database = 'postgres'
 
 engine = create_engine(f'postgresql://{username}:{password}@{hostname}:5432/{database}')
